@@ -16,10 +16,16 @@ def handle_disconnect():
 
 @socketio.on('add_building')
 def handle_create_building(data):
-    result = create_building(data)
-    socketio.emit('building_add', result)
+    result_data, status_code = create_building(data)
+    socketio.emit('building_add', {
+        'data': result_data,
+        'status_code': status_code
+    })
 
 @socketio.on('delete_building')
 def handle_delete_building(data):
-    result = delete_building(data)
-    socketio.emit('building_deleted', result)
+    result_data, status_code = delete_building(data)
+    socketio.emit('building_deleted', {
+        'data': result_data,
+        'status_code': status_code
+    })

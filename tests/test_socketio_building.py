@@ -23,12 +23,11 @@ def on_message(data):
     print(f"Received message: {data}")
 
 # Handler for 'building_result' event
-@sio.on('building_result')
+@sio.on('building_add')
 def on_building_result(data):
     print(f"Received building result: {data}")
 
-# Handler for 'building_destroyed' event
-@sio.on('building_destroyed')
+@sio.on('building_deleted')
 def on_building_destroyed(data):
     print(f"Received destroy building result: {data}")
     
