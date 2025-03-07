@@ -1,4 +1,3 @@
-from flask import jsonify, request
 from .. import db
 from .models import Building
 

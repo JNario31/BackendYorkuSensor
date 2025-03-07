@@ -17,6 +17,7 @@ def create_app(config_mode='production'):
     migrate.init_app(app, db)
     
     from .buildings import sockets
+    from .sensors import sockets
 
     # Import models to ensure they're registered with SQLAlchemy
     with app.app_context():
