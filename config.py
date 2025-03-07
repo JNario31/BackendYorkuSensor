@@ -1,8 +1,24 @@
 import os
+
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DB_URL')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DB_URL', 'sqlite:///dev.db')
+
+class ProductionConfig(Config):
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DB_URL', 'postgresql://postgres:postgres@york_sensor_db:5432/postgres')
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DB_URL', 'sqlite:///test.db')
+
 config = {
-    "production": Config
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
 }

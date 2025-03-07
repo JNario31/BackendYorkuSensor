@@ -1,8 +1,8 @@
 import os
-
-from . import create_app
+from . import create_app, socketio
 
 app = create_app(os.getenv("APP_CONFIG", "production"))
+
 
 # Import models to ensure they're registered
 from .buildings.models import Building
@@ -13,4 +13,4 @@ def hello():
     return "Hello World!"
 
 if __name__ == "__main__":
-    app.run()
+    socketio.run(app)
