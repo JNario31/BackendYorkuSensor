@@ -30,6 +30,10 @@ def on_building_result(data):
 @sio.on('building_deleted')
 def on_building_destroyed(data):
     print(f"Received destroy building result: {data}")
+
+@sio.on('building_list')
+def list_buildings(data):
+    print(f"Received list_buildings: {data}")
     
 
 # Main function
@@ -50,6 +54,7 @@ def run_test():
 
         # Send a test add_building request
         test_building_data = {"name": "Test_Lab"}
+        
         print(f"Sending add_building event with data: {test_building_data}")
         sio.emit('add_building', test_building_data)
         
@@ -57,7 +62,17 @@ def run_test():
         print("Waiting for responses...")
         time.sleep(5)
 
+        # Send a test to list all buildings
+
+        print(f"Sending list_buildings event")
+        sio.emit('list_buildings')
+        
+        # Wait a bit to receive any responses
+        print("Waiting for responses...")
+        time.sleep(5)
+
         #Send a test to delete_building request
+
         print(f"Sending delete_building event with data: {test_building_data}")
         sio.emit('delete_building', test_building_data)
 

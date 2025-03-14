@@ -1,4 +1,4 @@
-from .controllers import create_building, delete_building
+from .controllers import create_building, delete_building, get_buildings
 from .. import socketio
 
 @socketio.on('message')
@@ -29,3 +29,8 @@ def handle_delete_building(data):
         'data': result_data,
         'status_code': status_code
     })
+
+@socketio.on('list_buildings')
+def handle_list_buildings():
+    socketio.emit('building_list', get_buildings())
+    #socketio.emit('building_list', "testing get_buildings connection")

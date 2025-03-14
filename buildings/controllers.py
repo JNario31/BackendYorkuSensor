@@ -27,3 +27,14 @@ def delete_building(data):
     db.session.commit()
 
     return {'message': f'Building "{building_name}" deleted sucessfully'}, 200
+
+def get_buildings():
+    buildings = Building.query.all()
+    response = [
+        {
+            'id': building.id,
+            'name': building.name
+        }
+        for building in buildings
+    ]
+    return response
