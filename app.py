@@ -7,6 +7,7 @@ app = create_app(os.getenv("APP_CONFIG", "production"))
 # Import models to ensure they're registered
 from .buildings.models import Building
 from .sensors.models import Sensor, SensorData
+from .subscriptions.models import Subscription
 
 @app.route('/')
 def hello():

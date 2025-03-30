@@ -8,3 +8,4 @@ flask_socketio==5.3.3
 python-socketio>=5.0.2
 python-dateutil
 datetime
+flask_cors

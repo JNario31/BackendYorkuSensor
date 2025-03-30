@@ -1,4 +1,4 @@
-from .controllers import create_building, delete_building, get_buildings
+from .controllers import create_building, delete_building, get_all_buildings, get_building
 from .. import socketio
 
 @socketio.on('message')
@@ -32,5 +32,17 @@ def handle_delete_building(data):
 
 @socketio.on('list_buildings')
 def handle_list_buildings():
-    socketio.emit('building_list', get_buildings())
-    #socketio.emit('building_list', "testing get_buildings connection")
+    print("Received 'list_buildings' event from client")  # Debug log
+    result_data, status_code = get_all_buildings()
+    socketio.emit('building_list', {
+        'data': result_data,
+        'status_code': status_code
+        })
+
+@socketio.on('get_building')
+def handle_get_building(data):
+    result_data, status_code = get_building(data)
+    socketio.emit('gotten_building', {
+        'data': result_data,
+        'status_code': status_code
+    })
