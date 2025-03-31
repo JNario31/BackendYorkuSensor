@@ -18,7 +18,7 @@ def unsubscribe(data):
     if not subscriber:
         return {'error': 'Email is required'}, 400
     
-    db.session.delete(Subscription.query.filter_by(subscriber));
+    db.session.delete(Subscription.query.filter_by(subscriber))
     db.session.commit()
 
     return {'message': f'Subscriber sucessfully unsubscribed'}, 200
