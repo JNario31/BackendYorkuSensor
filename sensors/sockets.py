@@ -28,10 +28,11 @@ def handle_create_sensor(data):
 @socketio.on('add_sensor_data')
 def handle_create_sensor(data):
     result_data, status_code = add_sensor_data(data)
-    socketio.emit('sensor_data', {
-        'data': result_data,
-        'status_code': status_code
+    socketio.emit("add_sensor_data", 
+        {"data": result_data, 
+         "status_code": status_code
     })
+    
 
 @socketio.on('get_sensor_id')
 def handle_get_sensor_id(data):
@@ -56,3 +57,4 @@ def handle_get_building_sensors(data):
         'data': result_data,
         'status_code': status_code
     })
+

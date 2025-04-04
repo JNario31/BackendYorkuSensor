@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from ..buildings.models import Building
 
 from ..buildings.controllers import get_building_id
@@ -7,6 +6,8 @@ from ..buildings.controllers import get_building_id
 from .. import db
 from .models import Sensor, SensorData
 from dateutil.parser import isoparse
+
+from .. import socketio
 
 def create_sensor(data):
     # Validate input data
@@ -146,6 +147,17 @@ def add_sensor_data(data):
         db.session.add(new_sensor_data)
         db.session.commit()
         
+        sensor_payload = {
+            "airflow": data.get('airflow'),
+            "humidity": data.get('humidity'),
+            "pressure": data.get('pressure'),
+            "temperature": data.get('temperature'),
+            "timestamp": timestamp.isoformat(),
+        }
+        
+        # Emit the new data point as a real-time update
+        socketio.emit("sensor_update", {"data": sensor_payload, "status_code": 200})
+
         return {'message': 'Sensor data added successfully'}, 201
     
     except Exception as e:
@@ -155,6 +167,8 @@ def add_sensor_data(data):
 def get_sensor_data(data):
     try:
         sensor_id = data.get('sensor_id')
+        time_range = data.get('time_range', '1h')  # Default to 1 hour if not provided
+        limit = data.get('limit', 100)
         if not sensor_id:
             return {'error': 'sensor id is required'}, 400
         
@@ -163,7 +177,21 @@ def get_sensor_data(data):
         if not sensor:
             return {'error': 'sensor does not exist'}, 400
         
-        sensor_data = SensorData.query.filter_by(sensor_id=sensor.id).all()
+        now = datetime.utcnow()
+        time_mapping = {
+            "1h": now - timedelta(hours=1),
+            "24h": now - timedelta(days=1),
+            "7d": now - timedelta(days=7),
+            "30d": now - timedelta(days=30),
+            "all-time": datetime.min
+        }
+
+        start_time = time_mapping.get(time_range, now - timedelta(hours=1))  # Default to 1 hour
+        
+        sensor_data = SensorData.query.filter(
+            SensorData.sensor_id == sensor.id,
+            SensorData.timestamp >= start_time
+        ).order_by(SensorData.timestamp.asc()).limit(limit).all()
 
         formatted_data = [
             {
@@ -180,4 +208,4 @@ def get_sensor_data(data):
     except Exception as e:
         return {'error': 'Data could not be retrieved'}, 400
     
-  
+    
