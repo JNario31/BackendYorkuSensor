@@ -39,6 +39,10 @@ def list_buildings(data):
 def get_building(data):
     print(f"Received building: {data}")
 
+    
+@sio.on('sensor_add')
+def get_building(data):
+    print(f"Received building: {data}")
 # Main function
 def run_test():
     server_url = 'http://localhost:4000'
@@ -49,39 +53,27 @@ def run_test():
         sio.connect(server_url, transports=['websocket'])
 
         # Send a test add_building request
-        test_building_data = {"name": "Test_Lab"}
+        test_building_data = {"name": "Bergeron"}
+        test_building_data1 = {"name": "Petrie-A"}
+        test_building_data2 = {"name": "Petrie-B"}
+        test_sensor_data = {"name": "Sensor0", "building_name": "Bergeron"}
+
         
         print(f"Sending add_building event with data: {test_building_data}")
         sio.emit('add_building', test_building_data)
-        
+
+        print(f"Sending add_building event with data: {test_building_data}")
+        sio.emit('add_building', test_building_data1)
+
+        print(f"Sending add_building event with data: {test_building_data}")
+        sio.emit('add_building', test_building_data2)    
+
+        print(f"Sending add_sensor event with data: {test_sensor_data}")
+        sio.emit('add_sensor', test_sensor_data)       
         # Wait a bit to receive any responses
         print("Waiting for responses...")
         time.sleep(5)
 
-        # Send a test to list all buildings
-
-        print(f"Sending list_buildings event")
-        sio.emit('list_buildings')
-        
-        # Wait a bit to receive any responses
-        print("Waiting for responses...")
-        time.sleep(5)
-
-        print(f"Sending get_building event")
-        sio.emit('get_building', test_building_data)
-
-        # Wait a bit to receive any responses
-        print("Waiting for responses...")
-        time.sleep(5)
-
-        #Send a test to delete_building request
-
-        print(f"Sending delete_building event with data: {test_building_data}")
-        sio.emit('delete_building', test_building_data)
-
-        # Wait a bit to receive any responses
-        print("Waiting for responses...")
-        time.sleep(5)
         
     except Exception as e:
         print(f"Error: {e}")

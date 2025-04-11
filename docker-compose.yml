@@ -1,4 +1,3 @@
-version: '3.9'
 
 services:
   york_sensor_app:
@@ -19,6 +18,8 @@ services:
               flask db migrate -m 'Auto migration' || true &&
               flask db upgrade || true &&
               flask run --host=0.0.0.0 --port=4000"
+
+              
 
               
     depends_on:

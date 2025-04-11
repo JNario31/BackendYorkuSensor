@@ -11,7 +11,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('DB_URL', 'postgresql://postgres:postgres@york_sensor_db:5432/postgres')
-
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DB_URL', 'sqlite:///test.db')
