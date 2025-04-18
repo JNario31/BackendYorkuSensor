@@ -214,4 +214,46 @@ def get_sensor_data(data):
     except Exception as e:
         return {'error': 'Data could not be retrieved'}, 400
     
+def get_sensor_data_latest(data):
+    try:
+        sensor_id = data.get('sensor_id')
+        if not sensor_id:
+            return {'error': 'sensor id is required'}, 400
+        
+        sensor = Sensor.query.get(sensor_id)
+
+        if not sensor:
+            return {'error': 'sensor does not exist'}, 400
+        
+        now = datetime.utcnow()
+        time_mapping = {
+            "1h": now - timedelta(hours=1),
+            "24h": now - timedelta(days=1),
+            "7d": now - timedelta(days=7),
+            "30d": now - timedelta(days=30),
+            "all-time": datetime.min
+        }
+
+        start_time = time_mapping.get(time_range, now - timedelta(hours=1))  # Default to 1 hour
+        
+        sensor_data = SensorData.query.filter(
+            SensorData.sensor_id == sensor.id,
+            SensorData.timestamp >= start_time
+        ).order_by(SensorData.timestamp.asc()).limit(limit).all()
+
+        formatted_data = [
+            {
+                "airflow": record.airflow,
+                "humidity": record.humidity,
+                "pressure": record.pressure,
+                "temperature": record.temperature,
+                "timestamp": record.timestamp.isoformat(),
+            }
+            for record in sensor_data
+        ]
+
+        return formatted_data, 200
+    except Exception as e:
+        return {'error': 'Data could not be retrieved'}, 400
+    
     
