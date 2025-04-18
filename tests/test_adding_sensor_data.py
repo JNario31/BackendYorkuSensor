@@ -26,9 +26,13 @@ def disconnect():
 def on_sensor_data(data):
     print(f"Received sensor data response: {json.dumps(data, indent=2)}")
 
+@sio.on('test_email')
+def on_test_email(data):
+    print(f"Received socket: {data}")
+
 @sio.on('surpassed_threshold')
-def on_test():
-    print(f"Surpassed threshold")
+def on_test(data):
+    print(f"SURPASSED THRESHOLD: {data}")
 
 def generate_sensor_data():
     """Generate realistic sensor data with some variation"""
