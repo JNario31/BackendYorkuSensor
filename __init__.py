@@ -32,6 +32,6 @@ def create_app(config_mode='production'):
         # Import models
         from .buildings.models import Building
         from .sensors.models import Sensor, SensorData
-        from .subscriptions.models import Subscription
+        from .subscriptions.models import Subscription, Alerts
     
     return app

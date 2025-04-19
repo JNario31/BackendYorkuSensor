@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 from ..buildings.models import Building
-
 from ..buildings.controllers import get_building_id
+from ..subscriptions.models import Alerts
 
 from .. import db
 from .models import Sensor, SensorData
 from dateutil.parser import isoparse
+# import alert system
+from ..subscriptions.alert_system import check_thresholds
+
 
 from .. import socketio
 
@@ -146,8 +149,12 @@ def add_sensor_data(data):
         )
         db.session.add(new_sensor_data)
         db.session.commit()
+
+        # Check if sensor thresholds have been surpassed and send email if necessary
+        check_thresholds(new_sensor_data)        
         
         sensor_payload = {
+            "id" : new_sensor_data.sensor_id,
             "airflow": data.get('airflow'),
             "humidity": data.get('humidity'),
             "pressure": data.get('pressure'),
@@ -169,6 +176,49 @@ def get_sensor_data(data):
         sensor_id = data.get('sensor_id')
         time_range = data.get('time_range', '1h')  # Default to 1 hour if not provided
         limit = data.get('limit', 100)
+        if not sensor_id:
+            return {'error': 'sensor id is required'}, 400
+        
+        sensor = Sensor.query.get(sensor_id)
+
+        if not sensor:
+            return {'error': 'sensor does not exist'}, 400
+        
+        now = datetime.utcnow()
+        time_mapping = {
+            "1h": now - timedelta(hours=1),
+            "24h": now - timedelta(days=1),
+            "7d": now - timedelta(days=7),
+            "30d": now - timedelta(days=30),
+            "all-time": datetime.min
+        }
+
+        start_time = time_mapping.get(time_range, now - timedelta(hours=1))  # Default to 1 hour
+        
+        sensor_data = SensorData.query.filter(
+            SensorData.sensor_id == sensor.id,
+            SensorData.timestamp >= start_time
+        ).order_by(SensorData.timestamp.asc()).limit(limit).all()
+
+        formatted_data = [
+            {
+                "id": sensor_id, 
+                "airflow": record.airflow,
+                "humidity": record.humidity,
+                "pressure": record.pressure,
+                "temperature": record.temperature,
+                "timestamp": record.timestamp.isoformat(),
+            }
+            for record in sensor_data
+        ]
+
+        return formatted_data, 200
+    except Exception as e:
+        return {'error': 'Data could not be retrieved'}, 400
+    
+def get_sensor_data_latest(data):
+    try:
+        sensor_id = data.get('sensor_id')
         if not sensor_id:
             return {'error': 'sensor id is required'}, 400
         

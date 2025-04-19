@@ -68,14 +68,14 @@ def run_test():
         print(f"Sending get_sensor_id event with data: {test_sensor_data}")
         sio.emit('get_sensor_id', test_sensor_data)
 
-        print(f"Sending delete_sensor event with data: {test_sensor_data}")
-        sio.emit('delete_sensor', test_sensor_data)
+        # print(f"Sending delete_sensor event with data: {test_sensor_data}")
+        # sio.emit('delete_sensor', test_sensor_data)
 
         print("Waiting for responses...")
         time.sleep(5)
 
-        print(f"Sending delete_building event with data: {test_building_data}")
-        sio.emit('delete_building', test_building_data)
+        # print(f"Sending delete_building event with data: {test_building_data}")
+        # sio.emit('delete_building', test_building_data)
 
         # Wait a bit to receive any responses
         print("Waiting for responses...")

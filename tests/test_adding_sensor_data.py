@@ -6,7 +6,7 @@ import json
 
 # Hardcoded configuration
 SERVER_URL = 'http://localhost:4000'
-SENSOR_ID = '4'  # Hardcoded sensor ID to 1
+SENSOR_ID = '1'  # Hardcoded sensor ID to 1
 DATA_INTERVAL = 2.0  # Send data every 2 seconds
 
 # Create a Socket.IO client
@@ -25,6 +25,14 @@ def disconnect():
 @sio.on('sensor_data')
 def on_sensor_data(data):
     print(f"Received sensor data response: {json.dumps(data, indent=2)}")
+
+@sio.on('test_email')
+def on_test_email(data):
+    print(f"Received socket: {data}")
+
+@sio.on('surpassed_threshold')
+def on_test(data):
+    print(f"SURPASSED THRESHOLD: {data}")
 
 def generate_sensor_data():
     """Generate realistic sensor data with some variation"""
