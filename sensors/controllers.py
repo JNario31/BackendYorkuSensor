@@ -154,6 +154,7 @@ def add_sensor_data(data):
         check_thresholds(new_sensor_data)        
         
         sensor_payload = {
+            "id" : new_sensor_data.sensor_id,
             "airflow": data.get('airflow'),
             "humidity": data.get('humidity'),
             "pressure": data.get('pressure'),
@@ -201,6 +202,7 @@ def get_sensor_data(data):
 
         formatted_data = [
             {
+                "id": sensor_id, 
                 "airflow": record.airflow,
                 "humidity": record.humidity,
                 "pressure": record.pressure,

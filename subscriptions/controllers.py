@@ -44,7 +44,6 @@ def get_alert_data(data):
 
     try:
         time_range = data.get('time_range', '1h')
-        limit = data.get('limit', 100)
 
         now = datetime.utcnow()
 
@@ -60,12 +59,12 @@ def get_alert_data(data):
 
         alert_data = Alerts.query.filter(
             Alerts.date >= start_time
-        ).order_by(Alerts.date.asc()).limit(limit).all()
+        ).order_by(Alerts.date.asc())
 
         formatted_data = [
             {
                 "id": record.id,
-                "date": record.date.isoformat(),
+                "timestamp": record.date.isoformat(),
                 "sensor_id": record.sensor_id,
                 "alert_type": record.alert_type,
                 "value": record.value

@@ -57,6 +57,15 @@ def send_email(sensor_id, alert_type, value):
     db.session.add(new_alert)
     db.session.commit()
 
+    payload = {
+        "timestamp": datetime.utcnow(),
+        "sensor_id": sensor_id,
+        "alert_type" : alert_type,
+        "value": value
+    }
+
+    socketio.emit('surpassed_threshold',{"data": payload, "status_code": 200})
+
     # 4) Build & send the email
     subject = "Threshold Surpassed"
     body = f"""
@@ -87,13 +96,6 @@ def send_email(sensor_id, alert_type, value):
             server.send_message(msg, from_addr=sender_email, to_addrs=[recipient])
             print(f"Email sent to {recipient} successfully!")
 
-        # 5) Broadcast over SocketIO if desired
-        socketio.emit('surpassed_threshold', {
-            "timestamp": new_alert.date.isoformat(),
-            "alert_type": alert_type,
-            "value": value,
-            "sent_to": recipient_list
-        })
 
     except Exception as e:
         print(f"Error sending email: {e}")
