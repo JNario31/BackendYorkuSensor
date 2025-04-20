@@ -1,9 +1,11 @@
 import csv
 from io import StringIO
-from flask import Blueprint, jsonify, make_response
+import io
+from flask import Blueprint, Response, abort
 from .controllers import add_sensor_data, create_sensor, delete_sensor, get_sensor_data, get_sensor_id, get_building_sensors
 from .. import socketio
 from .models import Sensor, SensorData
+
 
 bp = Blueprint('routes', __name__)
 
@@ -66,42 +68,40 @@ def handle_get_building_sensors(data):
 
 @bp.route('/export/<int:sensor_id>', methods=['GET'])
 def export_sensor_data(sensor_id):
-    try:
-        # Find the building
-        sensor = Sensor.query.get(sensor_id)
-        if not sensor:
-            return jsonify({'error': 'Sensor not found'}), 404
+    # 1) Look up the sensor (404 if not found)
+    sensor = Sensor.query.get(sensor_id)
+    if not sensor:
+        abort(404, description="Sensor not found")
 
-        # Query sensor data for the building
-        data = SensorData.query.filter_by(sensor_id=sensor.id).all()
-        if not data:
-            return jsonify({'error': 'No sensor data available for this building'}), 404
+    # 2) Fetch & sort its data
+    rows = (
+        SensorData.query
+        .filter_by(sensor_id=sensor_id)
+        .order_by(SensorData.timestamp.asc())
+        .all()
+    )
+    if not rows:
+        abort(404, description="No data for this sensor")
 
-        building_name = sensor.building.name
+    # 3) Build CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Timestamp', 'Temperature', 'Humidity', 'Pressure', 'Airflow'])
+    for r in rows:
+        writer.writerow([
+            r.timestamp.isoformat(),
+            r.temperature,
+            r.humidity,
+            r.pressure,
+            r.airflow,
+        ])
 
-        # Create a CSV in memory
-        csv_file = StringIO()
-        csv_writer = csv.writer(csv_file)
-
-        # Write CSV headers
-        csv_writer.writerow(['Timestamp', 'Temperature', 'Humidity', 'Pressure', 'Airflow'])
-
-        # Write data rows
-        for record in data:
-            csv_writer.writerow([
-                record.timestamp.isoformat(),
-                record.temperature,
-                record.humidity,
-                record.pressure,
-                record.airflow
-            ])
-
-        # Create a response with the CSV data
-        response = make_response(csv_file.getvalue())
-        response.headers['Content-Disposition'] = f'attachment; filename={building_name}_sensor_data.csv'
-        response.headers['Content-Type'] = 'text/csv'
-
-        return response
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+    # 4) Return it as a download
+    csv_bytes = output.getvalue().encode('utf-8')
+    filename = f"sensor_{sensor_id}_data.csv"
+    headers = {
+        'Content-Disposition': f'attachment; filename="{filename}"',
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Length': str(len(csv_bytes)),
+    }
+    return Response(csv_bytes, headers=headers)

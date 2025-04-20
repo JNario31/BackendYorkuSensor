@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from ..buildings.models import Building
 from ..buildings.controllers import get_building_id
 from ..subscriptions.models import Alerts
-
 from .. import db
 from .models import Sensor, SensorData
 from dateutil.parser import isoparse
