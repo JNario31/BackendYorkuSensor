@@ -46,7 +46,7 @@ def get_all_subscribers():
 def get_alert_data(data):
 
     try:
-        time_range = data.get('time_range', '1h')
+        #time_range = data.get('time_range', '1h')
 
         now = datetime.utcnow()
 
@@ -57,7 +57,7 @@ def get_alert_data(data):
             "30d": now - timedelta(days=30),
             "all-time": datetime.min
         }
-
+        time_range = "all-time"
         start_time = time_mapping.get(time_range, now - timedelta(hours=1))
 
         # results = (
