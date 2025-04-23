@@ -21,6 +21,8 @@ def check_thresholds(data):
     pressure_thresholds    = [995, 1010]
     airflow_thresholds     = [1, 4]
 
+    socketio.emit('test_email', "REACHED 'CHECK_THRESHOLDS'")
+
     if data.temperature < temperature_thresholds[0] or data.temperature > temperature_thresholds[1]:
         send_email(data.sensor_id, "Temperature", data.temperature)
 
@@ -36,19 +38,22 @@ def check_thresholds(data):
 
 def send_email(sensor_id, alert_type, value):
     # 1) Fetch the most recent alert type
-    # last_alert = (
-    #     Alerts.query
-    #           .filter_by(alert_type=alert_type)
-    #           .order_by(Alerts.date.desc())
-    #           .first()
-    # )
-    last_alert, last_building = fetch_last_alert_with_building(alert_type)
+    last_alert = (
+        Alerts.query
+              .filter_by(alert_type=alert_type)
+              .order_by(Alerts.date.desc())
+              .first()
+    )
+    #last_alert, _ = fetch_last_alert_with_building(alert_type=alert_type, sensor_id=sensor_id)
+
+    socketio.emit('test_email', "REACHED SEND_EMAIL")
 
     # 2) Enforce 2‑minute cooldown
     if last_alert and (datetime.utcnow() - last_alert.date) < timedelta(minutes=2):
         print(f"{alert_type} alert not sent: cooldown still in effect.")
         return
 
+    socketio.emit('test_email', "PASSED LAST_ALERT CHECK")
     # 3) Record the new alert
 
     # call get building function
@@ -62,11 +67,19 @@ def send_email(sensor_id, alert_type, value):
     db.session.add(new_alert)
     db.session.commit()
 
+    socketio.emit('test_email', "PASSED NEW_ALERT CREATION")
+
+    db.session.refresh(new_alert)
+
+    socketio.emit('test_email', "PASSED DB REFRESH")
+
     # fetch building name for newly commited alert
-    alert_row, building_name = fetch_alert_by_id_with_building(new_alert.id)
+    _, building_name = fetch_alert_by_id_with_building(new_alert.id)
+
+    socketio.emit('test_email', "PASSED BUILDING_NAME FETCH")
 
     payload = {
-        "timestamp": datetime.utcnow(),
+        "timestamp": new_alert.date.isoformat(),
         "id": new_alert.id,
         "sensor_id": sensor_id,
         "alert_type" : alert_type,
@@ -75,6 +88,7 @@ def send_email(sensor_id, alert_type, value):
     }
 
     socketio.emit('surpassed_threshold',{"data": payload, "status_code": 200})
+    socketio.emit('test_email', "PASSED PAYLOAD CREATION")
 
     # 4) Build & send the email
     subject = "Threshold Surpassed"
