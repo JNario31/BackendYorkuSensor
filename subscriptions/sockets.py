@@ -1,4 +1,4 @@
-from .controllers import subscribe, unsubscribe, get_all_subscribers, get_alert_data
+from .controllers import subscribe, unsubscribe, get_all_subscribers, get_alert_data, delete_alert_data
 from .. import socketio
 
 @socketio.on('message')
@@ -44,6 +44,14 @@ def handle_get_alert_data(data):
     print("Received 'get_alert_data' event from client")
     result_data, status_code = get_alert_data(data)
     socketio.emit('alert_data', {
+        'data': result_data,
+        'status_code': status_code
+    })
+
+@socketio.on('delete_alert')
+def handle_delete_alert(data):
+    result_data, status_code = delete_alert_data(data)
+    socketio.emit('delete_alert_data', {
         'data': result_data,
         'status_code': status_code
     })

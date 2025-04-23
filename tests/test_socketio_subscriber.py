@@ -50,7 +50,7 @@ def run_test():
 
         # Send a test add_building request
         test_subscriber_data = {"email": "arpbruno325@gmail.com"}
-        test_alert_data = {'time_range': '24h'}
+        test_alert_data = {'time_range': '30d'}
         # test_subscriber_data = {"email": "exampleemail@gmail.com"}
 
         # Send a test add_building request      
@@ -59,12 +59,12 @@ def run_test():
         # STARTED COMMENTING HERE
 
 
-        # print(f"Sending add_subscriber event with data: {test_subscriber_data}")
-        # sio.emit('add_subscriber', test_subscriber_data)
+        print(f"Sending add_subscriber event with data: {test_subscriber_data}")
+        sio.emit('add_subscriber', test_subscriber_data)
         
-        # # Wait a bit to receive any responses
-        # print("Waiting for responses...")
-        # time.sleep(5)
+        # Wait a bit to receive any responses
+        print("Waiting for responses...")
+        time.sleep(5)
 
         # # Send a test to list all buildings
 

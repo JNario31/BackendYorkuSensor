@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
+from ..buildings.models import Building
+from ..sensors.models import Sensor
 from .models import Subscription, Alerts
+from .services import fetch_alerts_with_building, fetch_last_alert_with_building
 from .. import db
 
 def subscribe(data):
@@ -57,20 +60,33 @@ def get_alert_data(data):
 
         start_time = time_mapping.get(time_range, now - timedelta(hours=1))
 
-        alert_data = Alerts.query.filter(
-            Alerts.date >= start_time
-        ).order_by(Alerts.date.asc())
+        # results = (
+        #     db.session
+        #       .query(Alerts, Building.name.label("building_name"))
+        #       .join(Sensor,   Alerts.sensor_id == Sensor.id)
+        #       .join(Building, Sensor.building_id == Building.id)
+        #       .filter(Alerts.date >= start_time)
+        #       .order_by(Alerts.date.asc())
+        #       .all()
+        # )
+
+        rows = fetch_alerts_with_building(start_time=start_time)
 
         formatted_data = [
             {
-                "timestamp": record.date.isoformat(),
-                "sensor_id": record.sensor_id,
-                "alert_type": record.alert_type,
-                "value": record.value
+                "id": alert.id,
+                "timestamp": alert.date.isoformat(),
+                "sensor_id": alert.sensor_id,
+                "alert_type": alert.alert_type,
+                "value": alert.value,
+                "building_name": building_name
             }
-            for record in alert_data
+            for alert, building_name in rows
         ]
 
         return formatted_data, 200
     except Exception as e:
         return {'error': 'Data could not be retrieved'}, 400
+    
+def delete_alert_data(data):
+    print(f"hi")

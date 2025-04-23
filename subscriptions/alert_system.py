@@ -3,6 +3,7 @@ from .. import socketio
 from datetime import datetime, timedelta
 from dateutil.parser import isoparse
 from ..subscriptions.models import Alerts, Subscription
+from .services import fetch_last_alert_with_building, fetch_alerts_with_building, fetch_alert_by_id_with_building
 
 # email imports
 import smtplib
@@ -11,8 +12,8 @@ from email.mime.multipart import MIMEMultipart
 
 # email config
 # Email account credentials
-sender_email = "example@email.com"
-sender_password = "app_password"  # Use App Password if 2FA is enabled
+sender_email = "t85675139@gmail.com"
+sender_password = "cikp qfdq viop qzsy"  # Use App Password if 2FA is enabled
 
 def check_thresholds(data):
     temperature_thresholds = [20, 26]
@@ -35,12 +36,13 @@ def check_thresholds(data):
 
 def send_email(sensor_id, alert_type, value):
     # 1) Fetch the most recent alert type
-    last_alert = (
-        Alerts.query
-              .filter_by(alert_type=alert_type)
-              .order_by(Alerts.date.desc())
-              .first()
-    )
+    # last_alert = (
+    #     Alerts.query
+    #           .filter_by(alert_type=alert_type)
+    #           .order_by(Alerts.date.desc())
+    #           .first()
+    # )
+    last_alert, last_building = fetch_last_alert_with_building(alert_type)
 
     # 2) Enforce 2‑minute cooldown
     if last_alert and (datetime.utcnow() - last_alert.date) < timedelta(minutes=2):
@@ -48,6 +50,9 @@ def send_email(sensor_id, alert_type, value):
         return
 
     # 3) Record the new alert
+
+    # call get building function
+
     new_alert = Alerts(
         date=datetime.utcnow(),
         sensor_id=sensor_id,
@@ -57,11 +62,16 @@ def send_email(sensor_id, alert_type, value):
     db.session.add(new_alert)
     db.session.commit()
 
+    # fetch building name for newly commited alert
+    alert_row, building_name = fetch_alert_by_id_with_building(new_alert.id)
+
     payload = {
         "timestamp": datetime.utcnow(),
-        "id": sensor_id,
+        "id": new_alert.id,
+        "sensor_id": sensor_id,
         "alert_type" : alert_type,
-        "value": value
+        "value": value,
+        "building_name": building_name
     }
 
     socketio.emit('surpassed_threshold',{"data": payload, "status_code": 200})
