@@ -63,7 +63,6 @@ def get_alert_data(data):
 
         formatted_data = [
             {
-                "id": record.id,
                 "timestamp": record.date.isoformat(),
                 "sensor_id": record.sensor_id,
                 "alert_type": record.alert_type,

@@ -6,7 +6,7 @@ import json
 
 # Hardcoded configuration
 SERVER_URL = 'http://localhost:4000'
-SENSOR_ID = '1'  # Hardcoded sensor ID to 1
+SENSOR_ID = '2'  # Hardcoded sensor ID to 1
 DATA_INTERVAL = 2.0  # Send data every 2 seconds
 
 # Create a Socket.IO client

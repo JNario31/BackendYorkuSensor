@@ -59,7 +59,7 @@ def send_email(sensor_id, alert_type, value):
 
     payload = {
         "timestamp": datetime.utcnow(),
-        "sensor_id": sensor_id,
+        "id": sensor_id,
         "alert_type" : alert_type,
         "value": value
     }
